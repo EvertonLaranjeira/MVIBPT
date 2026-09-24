@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Consulte os percentuais aproximados de tributos por NCM ou NBS com a MV Contadores. Fonte dos dados: IBPT — De Olho no Imposto.">
+  <meta name="theme-color" content="#1d5d66">
+  <title>Consulta de tributos | MV Contadores</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./config.js?v=20260924-2" defer></script>
+  <script src="./app.js?v=20260924-2" defer></script>
+</head>
+<body>
+  <a class="skip" href="#consulta">Ir para a consulta</a>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="./" aria-label="MV Contadores — início"><img src="./assets/logo-escritorio.png" width="8333" height="3573" alt="MV Contadores"></a>
+      <div class="header-label">CONSULTA TRIBUTÁRIA <span>Informação para sua nota fiscal</span></div>
+      <a class="contact-top" href="mailto:atendimento@mvcontadores.com.br">Fale com o escritório <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+  <main class="shell" id="consulta">
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow">FERRAMENTAS MV CONTADORES</p><h1 id="page-title">Tributos, com clareza.</h1><p class="lead">Consulte a carga tributária aproximada por NCM ou NBS.</p></div>
+      <a class="source-label" href="https://deolhonoimposto.ibpt.org.br/" target="_blank" rel="noopener noreferrer"><span>FONTE DOS DADOS</span><strong>IBPT · De Olho no Imposto ↗</strong></a>
+    </section>
+    <div class="workspace">
+      <section class="query-panel" aria-labelledby="form-title">
+        <div class="section-heading"><span class="step">01</span><h2 id="form-title">Faça sua consulta</h2></div>
+        <form id="search-form">
+          <fieldset class="kind"><legend>O que você deseja consultar?</legend><div class="segmented">
+            <label><input type="radio" name="tipo" value="ncm" checked><span>Produto <small>NCM</small></span></label>
+            <label><input type="radio" name="tipo" value="nbs"><span>Serviço <small>NBS</small></span></label>
+          </div></fieldset>
+          <div class="field"><label for="codigo" id="code-label">Código NCM</label><input id="codigo" name="codigo" inputmode="numeric" autocomplete="off" placeholder="Ex.: 0101.21.00" maxlength="14" required aria-describedby="code-hint"><small id="code-hint">Informe os 8 dígitos do produto.</small></div>
+          <div class="two-columns">
+            <div class="field"><label for="uf">Estado (UF)</label><select name="uf" id="uf" required></select></div>
+            <div class="field" id="ex-field"><label for="ex">Exceção (EX)</label><input name="ex" id="ex" value="0" inputmode="numeric" pattern="[0-9]{1,3}" maxlength="3" aria-describedby="ex-hint"><small id="ex-hint">Use 0 se não houver.</small></div>
+          </div>
+          <div class="field"><label for="origem">Origem para o cálculo federal</label><select id="origem" name="origem"><option value="nacional">Nacional</option><option value="importado">Importado</option></select><small>Define qual percentual federal será utilizado.</small></div>
+          <details class="extra" id="api-extra" hidden><summary>Informações complementares</summary><p>Preencha se forem solicitadas pelo IBPT para o item consultado.</p><div class="field"><label for="descricao">Descrição do item</label><input id="descricao" name="descricao" maxlength="300"></div><div class="two-columns"><div class="field"><label for="unidade">Unidade de medida</label><input id="unidade" name="unidade" maxlength="12" placeholder="Ex.: UN"></div><div class="field" id="gtin-field"><label for="gtin">GTIN</label><input id="gtin" name="gtin" inputmode="numeric" maxlength="14" placeholder="Se houver"></div></div></details>
+          <button class="primary" id="submit" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span>Consultar tributos</span></button>
+          <p class="form-note"><span id="data-mode">Consulta direta à API IBPT.</span></p>
+        </form>
+      </section>
+      <section class="result-panel" aria-labelledby="result-title" aria-busy="false">
+        <div class="section-heading result-heading"><div><span class="step">02</span><h2 id="result-title">Resultado da consulta</h2></div><span class="result-tag" id="result-tag">Aguardando consulta</span></div>
+        <div id="status" role="status" aria-live="polite"></div>
+        <div id="empty" class="empty-state"><div class="document-icon" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 7h21l10 10v39H18z"/><path d="M39 7v11h10M25 27h17M25 34h17M25 41h9"/><circle cx="44" cy="46" r="9"/><path d="m51 53 7 7"/></svg></div><h3>Encontre os percentuais<br>para sua nota fiscal.</h3><p>Informe o código e o estado ao lado.<br>Os tributos serão apresentados separadamente.</p><div class="empty-labels"><span>Federal</span><span>Estadual</span><span>Municipal</span></div></div>
+        <div id="result" hidden>
+          <div class="item-heading"><p class="eyebrow" id="item-code"></p><h3 id="item-description"></h3><p id="item-context" class="muted"></p></div>
+          <div class="tax-grid"><article><span>Federal</span><strong id="federal"></strong></article><article><span>Estadual</span><strong id="estadual"></strong></article><article><span>Municipal</span><strong id="municipal"></strong></article></div>
+          <div class="total"><div><span>Total aproximado</span><small id="total-base"></small></div><div><strong id="total-rate"></strong></div></div>
+          <dl class="metadata"><div><dt>Vigência</dt><dd id="validity"></dd></div><div><dt>Versão</dt><dd id="version"></dd></div><div><dt>Chave IBPT</dt><dd id="key"></dd></div><div><dt>Consultado em</dt><dd id="queried"></dd></div></dl>
+          <p class="result-source">Fonte: <a href="https://deolhonoimposto.ibpt.org.br/" target="_blank" rel="noopener noreferrer" id="source-name">IBPT — De Olho no Imposto</a></p>
+          <button class="secondary" id="copy" type="button">Copiar resultado</button><p id="copy-status" role="status" class="muted"></p>
+        </div>
+        <aside class="explanation"><span class="info-symbol" aria-hidden="true">i</span><p><strong>Sobre os percentuais</strong>A carga tributária aproximada é informativa e considera a cadeia de produção. Não corresponde necessariamente ao imposto recolhido pela empresa ou à alíquota do Simples Nacional.</p></aside>
+      </section>
+    </div>
+    <section class="source-strip"><div><p class="eyebrow">TRANSPARÊNCIA NA INFORMAÇÃO</p><h2>Dados do IBPT. Consulta pela MV.</h2></div><p>Os percentuais são fornecidos pelo <strong>Instituto Brasileiro de Planejamento e Tributação</strong>, por meio do projeto De Olho no Imposto. <a href="https://deolhonoimposto.ibpt.org.br/" target="_blank" rel="noopener noreferrer">Conheça a fonte oficial ↗</a></p></section>
+  </main>
+  <footer><div class="shell footer-grid"><div><strong class="footer-brand">MV <span>Contadores</span></strong><p>Belém · Pará</p></div><address>Av. Gentil Bitencourt, 1096, Sala 06 e 07<br>66035-115, Bairro Nazaré<br>Belém - PA, Brasil</address><div class="footer-contact"><a href="tel:+559132491682">(91) 3249-1682</a><a href="mailto:atendimento@mvcontadores.com.br">atendimento@mvcontadores.com.br</a></div></div><div class="shell footer-bottom"><span>MV Contadores · Consulta de tributos</span><span>Fonte tributária: IBPT / Empresômetro</span></div></footer>
+  <noscript>Ative o JavaScript no navegador para consultar os tributos.</noscript>
+</body>
+</html>
