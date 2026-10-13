@@ -23,9 +23,10 @@ function invalidate() {
 }
 function setType() {
   const product = form.elements.tipo.value === 'ncm';
-  $('code-label').textContent = product ? 'Código NCM' : 'Código NBS';
-  $('codigo').placeholder = product ? 'Ex.: 0101.21.00' : 'Ex.: 1.0101.10.00';
-  $('code-hint').textContent = `Informe os ${product ? 8 : 9} dígitos do ${product ? 'produto' : 'serviço'}.`;
+  const lc = form.elements.tipo.value === 'lc116';
+  $('code-label').textContent = product ? 'Código NCM' : lc ? 'Código de serviço LC 116' : 'Código NBS';
+  $('codigo').placeholder = product ? 'Ex.: 0101.21.00' : lc ? 'Ex.: 01.01' : 'Ex.: 1.0101.10.00';
+  $('code-hint').textContent = `Informe os ${product ? 8 : lc ? 4 : 9} dígitos do ${product ? 'produto' : 'serviço'}.`;
   $('ex-field').hidden = !product; $('ex').disabled = !product;
   $('gtin-field').hidden = !product; $('gtin').disabled = !product;
 }
@@ -35,7 +36,7 @@ function show(data) {
   result = data;
   $('empty').hidden = true; $('result').hidden = false;
   $('result-tag').textContent = 'Vigência conferida';
-  $('item-code').textContent = `${data.tipo.toUpperCase()} ${data.codigo} · ${data.uf}${data.tipo === 'ncm' && data.ex !== '0' ? ' · EX ' + data.ex : ''}`;
+  $('item-code').textContent = `${(data.tipo === 'lc116' ? 'LC 116' : data.tipo.toUpperCase())} ${data.codigo} · ${data.uf}${data.tipo === 'ncm' && data.ex !== '0' ? ' · EX ' + data.ex : ''}`;
   $('item-description').textContent = data.descricao;
   $('item-context').textContent = `Origem ${data.origem === 'importado' ? 'importada' : 'nacional'} · ${data.local ? "Tabela IBPT carregada (sem atualização automática)" : "Consulta direta ao IBPT"}`;
   for (const type of ['federal', 'estadual', 'municipal']) {
@@ -55,7 +56,7 @@ form.addEventListener('submit', async event => {
   try {
     const tipo = form.elements.tipo.value;
     const codigo = $('codigo').value.replace(/[.\s-]/g, '');
-    if (!new RegExp(`^\\d{${tipo === 'ncm' ? 8 : 9}}$`).test(codigo)) { $('codigo').focus(); throw new Error(`Informe um ${tipo.toUpperCase()} com ${tipo === 'ncm' ? 8 : 9} dígitos.`); }
+    if (!new RegExp(`^\\d{${tipo === 'ncm' ? 8 : tipo === 'lc116' ? 4 : 9}}$`).test(codigo)) { $('codigo').focus(); throw new Error(`Informe um ${tipo.toUpperCase()} com ${tipo === 'ncm' ? 8 : tipo === 'lc116' ? 4 : 9} dígitos.`); }
     query = { tipo, codigo, uf: $('uf').value, ex: $('ex').value, origem: $('origem').value, valor: null, descricao: $('descricao').value, unidade: $('unidade').value, gtin: $('gtin').value };
   } catch (error) { status(error.message, true); return; }
   const ticket = sequence;
@@ -81,7 +82,7 @@ form.addEventListener('submit', async event => {
 $('copy').addEventListener('click', async () => {
   if (!result) return;
   const d = result;
-  const lines = [`MV Contadores — Tributos aproximados`, `${d.tipo.toUpperCase()} ${d.codigo} · ${d.uf}${d.tipo === 'ncm' ? ' · EX ' + d.ex : ''}`, d.descricao, `Origem: ${d.origem}`, d.local ? 'Consulta à tabela carregada; sem atualização automática.' : 'Consulta direta à API do IBPT.'];
+  const lines = [`MV Contadores — Tributos aproximados`, `${(d.tipo === 'lc116' ? 'LC 116' : d.tipo.toUpperCase())} ${d.codigo} · ${d.uf}${d.tipo === 'ncm' ? ' · EX ' + d.ex : ''}`, d.descricao, `Origem: ${d.origem}`, d.local ? 'Consulta à tabela carregada; sem atualização automática.' : 'Consulta direta à API do IBPT.'];
   for (const type of ['federal','estadual','municipal']) lines.push(`${type[0].toUpperCase() + type.slice(1)}: ${percent(d[type])}`);
   lines.push(`Total aproximado: ${percent(d.total)}`, `Vigência: ${date(d.vigenciaInicio)} a ${date(d.vigenciaFim)} · Versão ${d.versao} · Chave ${d.chave}`, `Fonte: ${d.fonte} — https://deolhonoimposto.ibpt.org.br/`);
   try { await navigator.clipboard.writeText(lines.join('\n')); $('copy-status').textContent = 'Resultado copiado com a fonte IBPT.'; }

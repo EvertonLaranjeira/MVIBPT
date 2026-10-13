@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Consulte os percentuais aproximados de tributos por NCM ou NBS com a MV Contadores. Fonte dos dados: IBPT — De Olho no Imposto.">
+  <meta name="description" content="Consulte os percentuais aproximados de tributos por NCM, NBS ou LC 116 com a MV Contadores. Fonte dos dados: IBPT — De Olho no Imposto.">
   <meta name="theme-color" content="#1d5d66">
   <title>Consulta de tributos | MV Contadores</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
-  <script src="./config.js?v=20260924-2" defer></script>
-  <script src="./app.js?v=20260924-2" defer></script>
+  <script src="./config.js?v=20261013" defer></script>
+  <script src="./app.js?v=20261013" defer></script>
 </head>
 <body>
   <a class="skip" href="#consulta">Ir para a consulta</a>
@@ -22,7 +22,7 @@
   </header>
   <main class="shell" id="consulta">
     <section class="intro" aria-labelledby="page-title">
-      <div><p class="eyebrow">FERRAMENTAS MV CONTADORES</p><h1 id="page-title">Tributos, com clareza.</h1><p class="lead">Consulte a carga tributária aproximada por NCM ou NBS.</p></div>
+      <div><p class="eyebrow">FERRAMENTAS MV CONTADORES</p><h1 id="page-title">Tributos, com clareza.</h1><p class="lead">Consulte a carga tributária aproximada por NCM, NBS ou LC 116.</p></div>
       <a class="source-label" href="https://deolhonoimposto.ibpt.org.br/" target="_blank" rel="noopener noreferrer"><span>FONTE DOS DADOS</span><strong>IBPT · De Olho no Imposto ↗</strong></a>
     </section>
     <div class="workspace">
@@ -32,7 +32,7 @@
           <fieldset class="kind"><legend>O que você deseja consultar?</legend><div class="segmented">
             <label><input type="radio" name="tipo" value="ncm" checked><span>Produto <small>NCM</small></span></label>
             <label><input type="radio" name="tipo" value="nbs"><span>Serviço <small>NBS</small></span></label>
-          </div></fieldset>
+          <label><input type="radio" name="tipo" value="lc116"><span>Serviço <small>LC 116</small></span></label></div></fieldset>
           <div class="field"><label for="codigo" id="code-label">Código NCM</label><input id="codigo" name="codigo" inputmode="numeric" autocomplete="off" placeholder="Ex.: 0101.21.00" maxlength="14" required aria-describedby="code-hint"><small id="code-hint">Informe os 8 dígitos do produto.</small></div>
           <div class="two-columns">
             <div class="field"><label for="uf">Estado (UF)</label><select name="uf" id="uf" required></select></div>
